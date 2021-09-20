@@ -45,7 +45,6 @@ def login(username, password) -> (str, requests.session):
     url = "https://support.euserv.com/index.iphp"
     f = s.post(url, headers=headers, data=login_data)
     f.raise_for_status()
-    print(f.text)
     if f.text.find('Hello') == -1:
         return '-1', s
     return sess_id, s

@@ -13,6 +13,7 @@ PROXIES = {
 
 
 def login(username, password) -> (str, requests.session):
+    sess_id, s = get_session_id()
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/83.0.4103.116 Safari/537.36",
@@ -24,12 +25,27 @@ def login(username, password) -> (str, requests.session):
         "form_selected_language": "en",
         "Submit": "Login",
         "subaction": "login"
+        "sess_id": sess_id
     }
     url = "https://support.euserv.com/index.iphp"
     session = requests.Session()
     f = session.post(url, headers=headers, data=login_data)
     f.raise_for_status()
-    if f.text.find('Hello') == -1:
+    if f.text.find('Customer ID') == -1:
+        return '-1', session
+    return sess_id, session
+
+def get_session_id() -> (str, requests.session):
+    headers = {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/83.0.4103.116 Safari/537.36",
+        "origin": "https://www.euserv.com"
+    }
+    url = "https://support.euserv.com/index.iphp"
+    session = requests.Session()
+    f = session.get(url, headers=headers)
+    f.raise_for_status()
+    if f.text.find('Login') == -1:
         return '-1', session
     # print(f.request.url)
     sess_id = f.request.url[f.request.url.index('=') + 1:len(f.request.url)]

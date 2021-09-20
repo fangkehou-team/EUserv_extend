@@ -24,7 +24,7 @@ def login(username, password) -> (str, requests.session):
         "password": password,
         "form_selected_language": "en",
         "Submit": "Login",
-        "subaction": "login"
+        "subaction": "login",
         "sess_id": sess_id
     }
     url = "https://support.euserv.com/index.iphp"

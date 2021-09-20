@@ -6,10 +6,22 @@ from bs4 import BeautifulSoup
 
 USERNAME = os.environ["USERNAME"]
 PASSWORD = os.environ["PASSWORD"]
+SCKEY = os.environ["MSGSERCET"]
 PROXIES = {
     "http": "http://127.0.0.1:10809",
     "https": "http://127.0.0.1:10809"
 }
+
+def server_chan(msg):
+    data = (
+        ('text', 'EUserv续费日志'),
+        ('desp', msg)
+    )
+    response = requests.post('https://sc.ftqq.com/' + SCKEY + '.send', data=data)
+    if response.status_code != 200:
+        print('Server酱 推送失败')
+    else:
+        print('Server酱 推送成功')
 
 
 def login(username, password) -> (str, requests.session):
@@ -17,8 +29,11 @@ def login(username, password) -> (str, requests.session):
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/83.0.4103.116 Safari/537.36",
-        "origin": "https://www.euserv.com"
+        "origin": "https://support.euserv.com",
+        "Referer": "https://support.euserv.com/index.iphp?sess_id=" + sess_id
     }
+    png_url = "https://support.euserv.com/pic/logo_small.png"
+    s.get(png_url, headers=headers)
     login_data = {
         "email": username,
         "password": password,
@@ -28,12 +43,12 @@ def login(username, password) -> (str, requests.session):
         "sess_id": sess_id
     }
     url = "https://support.euserv.com/index.iphp"
-    session = requests.Session()
-    f = session.post(url, headers=headers, data=login_data)
+    f = s.post(url, headers=headers, data=login_data)
     f.raise_for_status()
-    if f.text.find('vServer') == -1:
-        return '-1', session
-    return sess_id, session
+    print(f.text)
+    if f.text.find('Hello') == -1:
+        return '-1', s
+    return sess_id, s
 
 def get_session_id() -> (str, requests.session):
     headers = {
@@ -145,11 +160,11 @@ if __name__ == "__main__":
         for k, v in SERVERS.items():
             if v:
                 if not renew(sessid, s, passwd_list[i], k):
-                    print("ServerID: %s Renew Error!" % k)
+                    server_chan("ServerID: %s Renew Error!" % k)
                 else:
-                    print("ServerID: %s has been successfully renewed!" % k)
+                    server_chan("ServerID: %s has been successfully renewed!" % k)
             else:
-                print("ServerID: %s does not need to be renewed" % k)
+                server_chan("ServerID: %s does not need to be renewed" % k)
         time.sleep(15)
         check(sessid, s)
         time.sleep(5)
